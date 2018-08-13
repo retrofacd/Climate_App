@@ -18,8 +18,8 @@ Base = automap_base()
 
 Base.prepare(engine, reflect=True)
 
-Station = Base.classes.station
 Measurement = Base.classes.measurement
+Station = Base.classes.station
 
 session = Session(engine)
 
@@ -59,11 +59,11 @@ def precipitation():
 #Query for the dates and pcrp NOT temperature observations from the last year.
 #Convert the query results to a Dictionary using date as the key and tobs as the value.
 #Return the JSON representation of your dictionary.
-    last_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    last_date = session.query(measurement.date).order_by(measurement.date.desc()).first()
     last_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
-    rain = session.query(Measurement.date, Measurement.prcp).\
-        filter(Measurement.date > last_year).\
-        order_by(Measurement.date).all()
+    rain = session.query(measurement.date, measurement.prcp).\
+        filter(measurement.date > last_year).\
+        order_by(measurement.date).all()
 
     prcp_totals = []
     for result in rain:
@@ -76,18 +76,18 @@ def precipitation():
 
 @app.route("/api/v1.0/stations")
 def stations():
-    stations_query = session.query(Station.name, Station.station)
+    stations_query = session.query(station.name, station.station)
     stations = pd.read_sql(stations_query.statement, stations_query.session.bind)
     return jsonify(stations.to_dict())
 
 def tobs():
     """List of Temperature Observations (tobs) for the previous year"""
 
-    last_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    last_date = session.query(measurement.date).order_by(measurement.date.desc()).first()
     last_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
-    temperature = session.query(Measurement.date, Measurement.tobs).\
-        filter(Measurement.date > last_year).\
-        order_by(Measurement.date).all()
+    temperature = session.query(measurement.date, measurement.tobs).\
+        filter(measurement.date > last_year).\
+        order_by(measurement.date).all()
 
     temp_totals = []
     for result in temperature:
@@ -105,8 +105,8 @@ def option1(start):
     last_year = dt.timedelta(days=365)
     start = start_date-last_year
     end =  dt.date(2017, 8, 23)
-    trip_data = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
-        filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    trip_data = session.query(func.min(measurement.tobs), func.avg(measurement.tobs), func.max(measurement.tobs)).\
+        filter(measurement.date >= start).filter(measurement.date <= end).all()
     trip = list(np.ravel(trip_data))
     return jsonify(trip)
 
@@ -118,8 +118,8 @@ def option2(start,end):
     last_year = dt.timedelta(days=365)
     start = start_date-last_year
     end = end_date-last_year
-    trip_data = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
-        filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    trip_data = session.query(func.min(measurement.tobs), func.avg(measurement.tobs), func.max(measurement.tobs)).\
+        filter(measurement.date >= start).filter(measurement.date <= end).all()
     trip = list(np.ravel(trip_data))
     return jsonify(trip)
 
